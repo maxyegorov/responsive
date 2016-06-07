@@ -1,0 +1,77 @@
+<!doctype html>
+<html data-ng-app="responsiveViewer">
+<head>
+<meta charset="UTF-8">
+<title>RESPONSIVE VIEWER by Maxim Yegorov</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script src="js/angular.min.js"></script>
+<script src="js/cnt.js"></script>
+</head>
+<body data-ng-controller="appController" id="body" 
+ style='-moz-user-select: none; -webkit-user-select: none; -ms-user-select:none; user-select:none;-o-user-select:none;' 
+ unselectable='on'
+ onselectstart='return false;'
+ ng-mousemove="mMove($event)" 
+ ng-mouseup="mUp()">
+<aside class="addoptions">
+	<ul>
+		<li>Load preset<br/>
+			<select style="width:98%;" data-ng-change="getStore()" data-ng-model="preset" id="loadp">
+				<option>Select</option>
+				<option data-ng-repeat="preset in presets" value="{{preset}}">{{preset}}</option>
+			</select>
+		</li>
+		<li>
+			Save preset<br/>
+			<input data-ng-model="sname" placeholder="NAME" type="text"/>
+			<input style="float: right; width:60px;" data-ng-click="toStore()" value="SAVE" type="button"/>
+		</li>
+		<li>
+			Drop preset<br/>
+			<input data-ng-model="rname" placeholder="NAME" type="text"/>
+			<input style="float: right; width:60px;" data-ng-click="rmStore()" value="DROP" type="button"/>
+		</li>
+		<li>
+			<input data-ng-click="imStore()" value="IMPORT" type="button"/>
+			<input style="float: right;" data-ng-click="exStore()" value="EXPORT" type="button"/>
+		</li>
+		<!--<li><input data-ng-click="exPresets()" value="EXPORT PRESETS" type="button"/></li>-->
+	</ul>
+</aside>
+
+<section class="preset">
+<header>
+	<span>
+		<form data-ng-submit="navigateTo('','none',gurl)" id="navform">
+			<img data-ng-click="refresh()" data-ng-class="{'spin': spin == true}" id="refresh" src="assets/refresh.png"/> 
+			<input data-ng-model="gurl" placeholder="Website URL" id="addbar" type="text"/> 
+			<input value="GO!" id="gobtn" type="submit"/>
+		</form>
+	</span> 
+	
+	<span data-ng-repeat="(key,window) in windows" data-ng-class="{'active': moving == true && wselected == key}" class="scontrols">
+		<input value="iphone4" id="oldsize" type="hidden"/>
+		
+		<input data-ng-model="urls[key]" data-ng-keydown="navigateTo($event,key,urls[key])" data-ng-blur="navigateTo('blur',key,urls[key])" placeholder="URL" id="url" type="text"/>
+		
+		<select data-ng-change="changeWindow(key,window.screen)" data-ng-model="window.screen" data-ng-options="screen.id as screen.label for screen in screens"></select>
+		
+		<input data-ng-change="limitScale(key)" data-ng-model="window.scale" id="scale" value="100" placeholder="Scale" type="text"/> %
+		
+		<input class="cwindow" type="button" value="x" data-ng-click="closeWindow(key)"/>
+	</span>
+	
+	<a data-ng-click="newWindow()" href="javascript:void(0);" class="addwindow"> + add</a>
+</header>
+
+<div class="window" data-ng-class="{'move': window.index == '999'}" data-ng-repeat="(key,window) in windows" style="position:{{window.pos}}; left:{{window.x}}; top:{{window.y}}; z-index:{{window.index}}; width:{{changeScale(key,window.width)}}; height:{{changeScale(key,window.height)}};" id="window_{{key}}">
+	
+	<span ng-mousedown="mDown($event,key)" class="mover"></span>
+	
+	<span style="display:block; width:{{window.width}}; height:{{window.height}}; transform:scale({{window.scale/100}},{{window.scale/100}}); -webkit-transform:scale({{window.scale/100}},{{window.scale/100}}); margin-left:{{changeInner(key,window.width)}}; margin-top:{{changeInner(key,window.height)}};" ng-bind-html="window.wframe  | renderHTMLCorrectly"></span>
+	
+	<div class="movehelper" data-ng-show="moving == true"></div>
+</div>
+</section>
+</body>
+</html>
